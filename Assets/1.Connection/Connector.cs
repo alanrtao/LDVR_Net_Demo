@@ -53,6 +53,25 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
 
     RelayHostData hostData;
     RelayJoinData joinData;
+    public InputField JoinCode;
+    public Button Host, Client;
+
+    public UnityTransport Transport => NetworkManager.Singleton.gameObject.GetComponent<UnityTransport>();
+
+    private void Start()
+    {
+        // due to the asynchronous methods not recognized by Unity Inspector,
+        // we add button events through listeners
+        Host.onClick.AddListener(async delegate
+        {
+            await StartHost();
+        });
+
+        Client.onClick.AddListener(async delegate
+        {
+            await StartClient();
+        });
+    }
 
     /// <summary>
     /// Allocate an internet connection on Unity Relay and return relevant info
@@ -80,6 +99,13 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
         //Retrieve the Relay join code for our clients to join our party
         data.JoinCode = await Relay.Instance.GetJoinCodeAsync(data.AllocationID);
         hostData = data;
+
+        Transport.SetHostRelayData(
+            data.IPv4Address,
+            data.Port,
+            data.AllocationIDBytes,
+            data.Key,
+            data.ConnectionData);
 
         if (NetworkManager.Singleton.StartHost())
         {
@@ -117,6 +143,14 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
         };
         joinData = data;
 
+        Transport.SetClientRelayData(
+            data.IPv4Address,
+            data.Port,
+            data.AllocationIDBytes,
+            data.Key,
+            data.ConnectionData,
+            data.HostConnectionData);
+
         if (NetworkManager.Singleton.StartClient())
         {
             // see Logger (custom class) for implementation
@@ -138,8 +172,6 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
     }
-
-    public InputField JoinCode;
 
     /// <summary>
     /// RelayHostData represents the necessary informations
