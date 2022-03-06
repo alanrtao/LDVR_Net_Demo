@@ -51,6 +51,10 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
      * =========================================================================
      */
 
+    /**
+     * PLEASE DO DEVELOPMENT BUILD TO SEE LOGS
+     */
+
     RelayHostData hostData;
     RelayJoinData joinData;
     public InputField JoinCode;
@@ -150,6 +154,8 @@ public class Connector : MonoBehaviour // this is NOT a NetworkBehaviour
             data.Key,
             data.ConnectionData,
             data.HostConnectionData);
+
+        data.JoinCode = JoinCode.text;
 
         if (NetworkManager.Singleton.StartClient())
         {
